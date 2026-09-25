@@ -1,0 +1,68 @@
+# =============================================================================
+# Maze B -- "overpass": climb over two low partitions vs. the long way round
+# =============================================================================
+#   y=20 +-----------------------------------------------+
+#        |  G  <------- north corridor (slow) ---------+  |
+#   y=17 |  ^                                          |  |
+#        | =P= header/partition slot z 2.4-3.4  (fast) |  |
+#   y=13 |  |    +---------------+                     |  |
+#        |  | H1 |   core block  |   east room  P  P   |  |
+#        |  |    |  (solid, 5m)  |      (pillars)      v  |
+#   y=7  | =P=   +---------------+                        |
+#        |  ^                                             |
+#        |  S  ---------- south corridor (slow) -------> -+
+#   y=0  +------------------------------------------------+
+#        x=0   5            10                          20
+#
+# Fast route: straight up the 5 m west strip, climbing to z ~2.9 to pass two
+# 1.0 m-tall slots between a low partition (top z 2.4) and a header beam
+# (bottom z 3.4), with a hanging block in between.
+# Slow route: ground level (z 1.0) round the solid core through the east room.
+# =============================================================================
+name: maze_b_overpass
+description: >
+  Vertical shortcut. Fast route climbs through two 1 m-tall slots over low
+  partitions; slow route stays at ground level round a solid core block.
+bounds: [20.0, 20.0, 5.0]
+floor_color: [0.22, 0.22, 0.24]
+perimeter: {thickness: 0.3, color: [0.50, 0.50, 0.52]}
+
+start: {pos: [2.5, 2.5, 1.0], yaw_deg: 90.0}
+goal: {pos: [2.5, 17.5, 1.0], radius: 0.6}
+
+primitives:
+  # ---- solid core separating the west strip (fast) from the east room (slow) ----
+  - {id: core_block, type: box, pos: [7.5, 10.0, 2.5], size: [5.0, 11.0, 5.0], color: [0.62, 0.66, 0.74]}
+  # ---- slot 1 at y = 7: low partition + header beam, gap z 2.4 - 3.4 ----
+  - {id: partition_1, type: box, pos: [2.5, 7.0, 1.2], size: [5.0, 0.3, 2.4], color: [0.86, 0.52, 0.18], tag: partition}
+  - {id: header_1, type: box, pos: [2.5, 7.0, 4.2], size: [5.0, 0.3, 1.6], color: [0.92, 0.80, 0.12], tag: frame}
+  # ---- slot 2 at y = 13 ----
+  - {id: partition_2, type: box, pos: [2.5, 13.0, 1.2], size: [5.0, 0.3, 2.4], color: [0.86, 0.52, 0.18], tag: partition}
+  - {id: header_2, type: box, pos: [2.5, 13.0, 4.2], size: [5.0, 0.3, 1.6], color: [0.92, 0.80, 0.12], tag: frame}
+  # ---- hanging obstacles between the slots, at the fast route's altitude ----
+  - {id: hang_1, type: box, pos: [1.8, 10.0, 2.9], size: [0.8, 0.8, 0.8], color: [0.95, 0.45, 0.08], tag: hanging}
+  - {id: hang_2, type: cylinder, pos: [3.2, 11.6, 2.9], radius: 0.3, height: 0.8, color: [0.95, 0.45, 0.08], tag: hanging}
+  # ---- off-centre pillars in the east room ----
+  - {id: pillar_1, type: cylinder, pos: [13.0, 7.5, 2.5], radius: 0.35, height: 5.0, color: [0.10, 0.45, 0.45], tag: pillar}
+  - {id: pillar_2, type: cylinder, pos: [16.8, 12.0, 2.5], radius: 0.35, height: 5.0, color: [0.10, 0.45, 0.45], tag: pillar}
+  - {id: pillar_3, type: cylinder, pos: [12.2, 12.8, 2.5], radius: 0.35, height: 5.0, color: [0.10, 0.45, 0.45], tag: pillar}
+  # ---- floor strips (visual only) ----
+  - {id: floor_fast, type: box, pos: [2.5, 10.0, 0.005], size: [1.2, 11.0, 0.01], color: [0.60, 0.12, 0.12], tag: decor, collision: false}
+  - {id: floor_slow, type: box, pos: [15.0, 10.0, 0.005], size: [1.2, 8.0, 0.01], color: [0.12, 0.22, 0.60], tag: decor, collision: false}
+
+routes:
+  fast:
+    kind: fast
+    design_speed_mps: 2.0
+    waypoints: [[2.5, 2.5, 1.0], [2.5, 5.5, 2.9], [2.5, 14.5, 2.9], [2.5, 17.5, 1.0]]
+    signature:
+      - {pos: [2.5, 7.0, 2.9], size: [5.0, 1.0, 1.2]}    # slot 1
+      - {pos: [2.5, 13.0, 2.9], size: [5.0, 1.0, 1.2]}   # slot 2
+    note: climb, thread two slots, descend
+  slow:
+    kind: slow
+    design_speed_mps: 2.0
+    waypoints: [[2.5, 2.5, 1.0], [10.8, 3.5, 1.0], [15.0, 6.0, 1.0], [15.0, 14.0, 1.0], [10.8, 16.5, 1.0], [2.5, 17.5, 1.0]]
+    signature:
+      - {pos: [15.0, 10.0, 2.5], size: [10.0, 5.0, 5.0]}  # east room
+    note: ground level round the core

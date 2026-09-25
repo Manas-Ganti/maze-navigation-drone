@@ -1,0 +1,75 @@
+# =============================================================================
+# Maze C -- "slalom": weave a hall of hanging obstacles vs. the ring corridor
+# =============================================================================
+#   y=20 +------------------------------------------------+
+#        |   +------- north ring corridor (slow) ------+   |
+#   y=16 |   |  ====================================== |   |
+#        |   |  ||    p        hall         p       || v   |
+#   y=10 |   S ->] P1  H1  H2  P2  H3  (slalom)      [-> G  |
+#        |      ||     p         p        p          ||     |
+#   y=4  |      ======================================      |
+#        |   south ring           |block|                  |
+#   y=0  +------------------------------------------------+
+#
+# Fast route: straight east through 1.1 m-wide hall doors and a slalom of
+# pillars (P) and hanging blocks (H) that sit ON the straight line.
+# Slow route: north ring corridor (3.85 m wide). The south ring is blocked.
+# Off-line pillars (p) keep the rest of the hall from being a safe shortcut.
+# =============================================================================
+name: maze_c_slalom
+description: >
+  Fast route weaves a slalom of pillars and hanging blocks through a hall with
+  narrow doors; slow route follows the wide north ring corridor.
+bounds: [20.0, 20.0, 5.0]
+floor_color: [0.22, 0.22, 0.24]
+perimeter: {thickness: 0.3, color: [0.50, 0.50, 0.52]}
+
+start: {pos: [2.0, 10.0, 1.2], yaw_deg: 0.0}
+goal: {pos: [18.0, 10.0, 1.2], radius: 0.6}
+
+primitives:
+  # ---- hall walls (hall interior x 4.15-15.85, y 4.15-15.85); doors y 9.45-10.55 ----
+  - {id: hall_s, type: box, pos: [10.0, 4.0, 2.5], size: [12.3, 0.3, 5.0], color: [0.70, 0.55, 0.75]}
+  - {id: hall_n, type: box, pos: [10.0, 16.0, 2.5], size: [12.3, 0.3, 5.0], color: [0.70, 0.55, 0.75]}
+  - {id: hall_w_s, type: box, pos: [4.0, 6.725, 2.5], size: [0.3, 5.45, 5.0], color: [0.70, 0.55, 0.75]}
+  - {id: hall_w_n, type: box, pos: [4.0, 13.275, 2.5], size: [0.3, 5.45, 5.0], color: [0.70, 0.55, 0.75]}
+  - {id: hall_e_s, type: box, pos: [16.0, 6.725, 2.5], size: [0.3, 5.45, 5.0], color: [0.70, 0.55, 0.75]}
+  - {id: hall_e_n, type: box, pos: [16.0, 13.275, 2.5], size: [0.3, 5.45, 5.0], color: [0.70, 0.55, 0.75]}
+  # ---- the south ring is blocked: the only safe way round is north ----
+  - {id: south_block, type: box, pos: [10.0, 1.925, 2.5], size: [0.3, 3.85, 5.0], color: [0.55, 0.55, 0.58]}
+  # ---- slalom ON the straight line y = 10 ----
+  - {id: pillar_s1, type: cylinder, pos: [6.2, 10.25, 2.5], radius: 0.35, height: 5.0, color: [0.10, 0.45, 0.45], tag: pillar}
+  - {id: hang_1, type: box, pos: [8.0, 9.7, 1.2], size: [0.7, 0.7, 0.7], color: [0.95, 0.45, 0.08], tag: hanging}
+  - {id: hang_2, type: cylinder, pos: [9.9, 10.35, 1.3], radius: 0.35, height: 0.8, color: [0.95, 0.45, 0.08], tag: hanging}
+  - {id: pillar_s2, type: cylinder, pos: [11.8, 9.7, 2.5], radius: 0.35, height: 5.0, color: [0.10, 0.45, 0.45], tag: pillar}
+  - {id: hang_3, type: box, pos: [13.7, 10.3, 1.1], size: [0.7, 0.7, 0.7], color: [0.95, 0.45, 0.08], tag: hanging}
+  # ---- off-line pillars: no wide, safe channel through the hall ----
+  - {id: pillar_o1, type: cylinder, pos: [7.0, 7.2, 2.5], radius: 0.35, height: 5.0, color: [0.10, 0.45, 0.45], tag: pillar}
+  - {id: pillar_o2, type: cylinder, pos: [10.5, 6.6, 2.5], radius: 0.35, height: 5.0, color: [0.10, 0.45, 0.45], tag: pillar}
+  - {id: pillar_o3, type: cylinder, pos: [14.0, 7.4, 2.5], radius: 0.35, height: 5.0, color: [0.10, 0.45, 0.45], tag: pillar}
+  - {id: pillar_o4, type: cylinder, pos: [7.4, 12.9, 2.5], radius: 0.35, height: 5.0, color: [0.10, 0.45, 0.45], tag: pillar}
+  - {id: pillar_o5, type: cylinder, pos: [10.8, 13.4, 2.5], radius: 0.35, height: 5.0, color: [0.10, 0.45, 0.45], tag: pillar}
+  - {id: pillar_o6, type: cylinder, pos: [13.6, 12.7, 2.5], radius: 0.35, height: 5.0, color: [0.10, 0.45, 0.45], tag: pillar}
+  # ---- floor strips (visual only) ----
+  - {id: floor_fast, type: box, pos: [10.0, 10.0, 0.005], size: [11.5, 1.2, 0.01], color: [0.60, 0.12, 0.12], tag: decor, collision: false}
+  - {id: floor_slow, type: box, pos: [10.0, 18.0, 0.005], size: [12.0, 1.2, 0.01], color: [0.12, 0.22, 0.60], tag: decor, collision: false}
+
+routes:
+  fast:
+    kind: fast
+    design_speed_mps: 1.5
+    # weave points: max-min-clearance polyline with |y - 10| <= 0.8 (numeric search, ~0.38 m clearance)
+    waypoints: [[2.0, 10.0, 1.2], [4.8, 10.0, 1.2], [6.2, 9.2, 1.2], [7.1, 10.1, 1.2], [8.0, 10.8, 1.2],
+                [8.95, 10.1, 1.2], [9.9, 9.45, 1.2], [10.85, 10.0, 1.2], [11.8, 10.65, 1.2], [12.75, 9.9, 1.2],
+                [13.7, 9.2, 1.2], [14.6, 9.8, 1.2], [15.2, 10.0, 1.2], [18.0, 10.0, 1.2]]
+    signature:
+      - {pos: [4.0, 10.0, 1.5], size: [0.8, 1.1, 3.0]}    # west door
+      - {pos: [16.0, 10.0, 1.5], size: [0.8, 1.1, 3.0]}   # east door
+    note: thread two 1.1 m doors and a five-obstacle slalom
+  slow:
+    kind: slow
+    design_speed_mps: 2.0
+    waypoints: [[2.0, 10.0, 1.2], [2.0, 17.3, 1.2], [18.0, 17.3, 1.2], [18.0, 10.0, 1.2]]
+    signature:
+      - {pos: [10.0, 18.0, 2.5], size: [4.0, 3.7, 5.0]}   # north ring corridor
+    note: wide ring corridor, ground level

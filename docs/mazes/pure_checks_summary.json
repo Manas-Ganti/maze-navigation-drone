@@ -1,0 +1,429 @@
+{
+  "maze_a_window": {
+    "passed": true,
+    "metrics": {
+      "start_clearance_m": 1.2000000476837158,
+      "geodesic_start_to_goal_m": 15.919605255126953,
+      "free_voxel_fraction": 0.8366439938545227,
+      "fast_length_m": 16.00142849854971,
+      "slow_length_m": 26.748780958563536,
+      "length_ratio": 1.671649563099189,
+      "safe_geodesic_m": 24.416595458984375,
+      "fast": {
+        "length_m": 16.00142849854971,
+        "min_clearance_m": 0.3000003695487976,
+        "z_min_m": 1.2000000476837158,
+        "z_max_m": 1.2999999523162842,
+        "hanging_near": 2,
+        "argmin_point": [
+          5.71,
+          10.0,
+          1.25
+        ]
+      },
+      "slow": {
+        "length_m": 26.748780958563536,
+        "min_clearance_m": 1.0262147188186646,
+        "z_min_m": 1.2000000476837158,
+        "z_max_m": 1.2000000476837158,
+        "hanging_near": 0,
+        "argmin_point": [
+          5.49,
+          3.52,
+          1.2
+        ]
+      },
+      "fast_features": [
+        "narrow-gap",
+        "weave(2)"
+      ],
+      "flythrough": {
+        "fast": {
+          "outcome": "success",
+          "t_s": 8.175,
+          "min_clearance_m": 0.3000003695487976
+        },
+        "slow": {
+          "outcome": "success",
+          "t_s": 13.57,
+          "min_clearance_m": 0.9677581787109375
+        }
+      }
+    },
+    "break_even": {
+      "fast_time_s": 8.0007,
+      "slow_time_s": 13.3744,
+      "fast_return": 10.7765,
+      "slow_return": 6.6682,
+      "crash_return": -8.7537,
+      "p_crash_break_even": 0.2104
+    },
+    "checks": [
+      {
+        "name": "6.1 spawn clear of colliders",
+        "passed": true,
+        "detail": "start clearance 1.20 m (need >= 0.65: radius + margin + spawn noise)"
+      },
+      {
+        "name": "6.1 goal in free space",
+        "passed": true,
+        "detail": "goal clearance 1.20 m (need >= 0.15)"
+      },
+      {
+        "name": "6.2 goal reachable (voxel search)",
+        "passed": true,
+        "detail": "geodesic start->goal 15.9 m at 0.2 m voxels"
+      },
+      {
+        "name": "6.3 slow/fast path-length ratio",
+        "passed": true,
+        "detail": "slow 26.7 m / fast 16.0 m = 1.67 (need >= 1.3)"
+      },
+      {
+        "name": "6.3 no unintended shortcut",
+        "passed": true,
+        "detail": "geodesic 15.9 m vs fast route 16.0 m (need >= 0.90x)"
+      },
+      {
+        "name": "6.3 speed requires risk",
+        "passed": true,
+        "detail": "shortest path with >= 0.7 m clearance 24.4 m vs slow route 26.7 m (need >= 0.85x)"
+      },
+      {
+        "name": "6.4 fast route passable",
+        "passed": true,
+        "detail": "min clearance 0.30 m at [5.71, 10.0, 1.25] (need >= radius 0.15 + margin 0.05)"
+      },
+      {
+        "name": "6.4 slow route passable",
+        "passed": true,
+        "detail": "min clearance 1.03 m at [5.49, 3.52, 1.2] (need >= radius 0.15 + margin 0.05)"
+      },
+      {
+        "name": "6.4 slow route is safe",
+        "passed": true,
+        "detail": "clearance 1.03 m (>= 0.7), max altitude 1.20 m (<= 2.0)"
+      },
+      {
+        "name": "6.4 fast route is risky",
+        "passed": true,
+        "detail": "features: ['narrow-gap', 'weave(2)']; clearance 0.30 m vs slow 1.03 m"
+      },
+      {
+        "name": "6.4 collider thickness",
+        "passed": true,
+        "detail": "all >= 0.2 m"
+      },
+      {
+        "name": "6.4 primitives inside bounds",
+        "passed": true,
+        "detail": "ok"
+      },
+      {
+        "name": "6.4 fast signature self-check",
+        "passed": true,
+        "detail": "authored fast route classified as 'fast'"
+      },
+      {
+        "name": "6.4 slow signature self-check",
+        "passed": true,
+        "detail": "authored slow route classified as 'slow'"
+      },
+      {
+        "name": "6.5 model flythrough (fast)",
+        "passed": true,
+        "detail": "success in 8.2 s at 2.0 m/s, min clearance 0.30 m, classified 'fast'"
+      },
+      {
+        "name": "6.5 model flythrough (slow)",
+        "passed": true,
+        "detail": "success in 13.6 s at 2.0 m/s, min clearance 0.97 m, classified 'slow'"
+      }
+    ]
+  },
+  "maze_b_overpass": {
+    "passed": true,
+    "metrics": {
+      "start_clearance_m": 1.0,
+      "geodesic_start_to_goal_m": 16.337783813476562,
+      "free_voxel_fraction": 0.7299919724464417,
+      "fast_length_m": 16.10211236182588,
+      "slow_length_m": 34.49552737470144,
+      "length_ratio": 2.1422982649457714,
+      "safe_geodesic_m": 29.666614532470703,
+      "fast": {
+        "length_m": 16.10211236182588,
+        "min_clearance_m": 0.30000004172325134,
+        "z_min_m": 1.0,
+        "z_max_m": 2.9000000953674316,
+        "hanging_near": 2,
+        "argmin_point": [
+          2.5,
+          9.6,
+          2.9
+        ]
+      },
+      "slow": {
+        "length_m": 34.49552737470144,
+        "min_clearance_m": 1.0,
+        "z_min_m": 1.0,
+        "z_max_m": 1.0,
+        "hanging_near": 0,
+        "argmin_point": [
+          2.5,
+          2.5,
+          1.0
+        ]
+      },
+      "fast_features": [
+        "narrow-gap",
+        "vertical-shortcut",
+        "weave(2)"
+      ],
+      "flythrough": {
+        "fast": {
+          "outcome": "success",
+          "t_s": 8.24,
+          "min_clearance_m": 0.30000004172325134
+        },
+        "slow": {
+          "outcome": "success",
+          "t_s": 17.42,
+          "min_clearance_m": 0.9906924962997437
+        }
+      }
+    },
+    "break_even": {
+      "fast_time_s": 8.0511,
+      "slow_time_s": 17.2478,
+      "fast_return": 10.7317,
+      "slow_return": 4.4046,
+      "crash_return": -8.7399,
+      "p_crash_break_even": 0.3249
+    },
+    "checks": [
+      {
+        "name": "6.1 spawn clear of colliders",
+        "passed": true,
+        "detail": "start clearance 1.00 m (need >= 0.65: radius + margin + spawn noise)"
+      },
+      {
+        "name": "6.1 goal in free space",
+        "passed": true,
+        "detail": "goal clearance 1.00 m (need >= 0.15)"
+      },
+      {
+        "name": "6.2 goal reachable (voxel search)",
+        "passed": true,
+        "detail": "geodesic start->goal 16.3 m at 0.2 m voxels"
+      },
+      {
+        "name": "6.3 slow/fast path-length ratio",
+        "passed": true,
+        "detail": "slow 34.5 m / fast 16.1 m = 2.14 (need >= 1.3)"
+      },
+      {
+        "name": "6.3 no unintended shortcut",
+        "passed": true,
+        "detail": "geodesic 16.3 m vs fast route 16.1 m (need >= 0.90x)"
+      },
+      {
+        "name": "6.3 speed requires risk",
+        "passed": true,
+        "detail": "shortest path with >= 0.7 m clearance 29.7 m vs slow route 34.5 m (need >= 0.85x)"
+      },
+      {
+        "name": "6.4 fast route passable",
+        "passed": true,
+        "detail": "min clearance 0.30 m at [2.5, 9.6, 2.9] (need >= radius 0.15 + margin 0.05)"
+      },
+      {
+        "name": "6.4 slow route passable",
+        "passed": true,
+        "detail": "min clearance 1.00 m at [2.5, 2.5, 1.0] (need >= radius 0.15 + margin 0.05)"
+      },
+      {
+        "name": "6.4 slow route is safe",
+        "passed": true,
+        "detail": "clearance 1.00 m (>= 0.7), max altitude 1.00 m (<= 2.0)"
+      },
+      {
+        "name": "6.4 fast route is risky",
+        "passed": true,
+        "detail": "features: ['narrow-gap', 'vertical-shortcut', 'weave(2)']; clearance 0.30 m vs slow 1.00 m"
+      },
+      {
+        "name": "6.4 collider thickness",
+        "passed": true,
+        "detail": "all >= 0.2 m"
+      },
+      {
+        "name": "6.4 primitives inside bounds",
+        "passed": true,
+        "detail": "ok"
+      },
+      {
+        "name": "6.4 fast signature self-check",
+        "passed": true,
+        "detail": "authored fast route classified as 'fast'"
+      },
+      {
+        "name": "6.4 slow signature self-check",
+        "passed": true,
+        "detail": "authored slow route classified as 'slow'"
+      },
+      {
+        "name": "6.5 model flythrough (fast)",
+        "passed": true,
+        "detail": "success in 8.2 s at 2.0 m/s, min clearance 0.30 m, classified 'fast'"
+      },
+      {
+        "name": "6.5 model flythrough (slow)",
+        "passed": true,
+        "detail": "success in 17.4 s at 2.0 m/s, min clearance 0.99 m, classified 'slow'"
+      }
+    ]
+  },
+  "maze_c_slalom": {
+    "passed": true,
+    "metrics": {
+      "start_clearance_m": 1.2000000476837158,
+      "geodesic_start_to_goal_m": 16.571496963500977,
+      "free_voxel_fraction": 0.8131440281867981,
+      "fast_length_m": 18.309894490148995,
+      "slow_length_m": 30.6,
+      "length_ratio": 1.6712275440179774,
+      "safe_geodesic_m": 27.868589401245117,
+      "fast": {
+        "length_m": 18.309894490148995,
+        "min_clearance_m": 0.3772522509098053,
+        "z_min_m": 1.2000000476837158,
+        "z_max_m": 1.2000000476837158,
+        "hanging_near": 3,
+        "argmin_point": [
+          7.43,
+          10.35,
+          1.2
+        ]
+      },
+      "slow": {
+        "length_m": 30.6,
+        "min_clearance_m": 1.1499992609024048,
+        "z_min_m": 1.2000000476837158,
+        "z_max_m": 1.2000000476837158,
+        "hanging_near": 0,
+        "argmin_point": [
+          3.86,
+          17.3,
+          1.2
+        ]
+      },
+      "fast_features": [
+        "narrow-gap",
+        "weave(3)"
+      ],
+      "flythrough": {
+        "fast": {
+          "outcome": "success",
+          "t_s": 12.205,
+          "min_clearance_m": 0.3057374060153961
+        },
+        "slow": {
+          "outcome": "success",
+          "t_s": 15.605,
+          "min_clearance_m": 0.9033668041229248
+        }
+      }
+    },
+    "break_even": {
+      "fast_time_s": 12.2066,
+      "slow_time_s": 15.3,
+      "fast_return": 7.4434,
+      "slow_return": 5.4702,
+      "crash_return": -8.2099,
+      "p_crash_break_even": 0.1261
+    },
+    "checks": [
+      {
+        "name": "6.1 spawn clear of colliders",
+        "passed": true,
+        "detail": "start clearance 1.20 m (need >= 0.65: radius + margin + spawn noise)"
+      },
+      {
+        "name": "6.1 goal in free space",
+        "passed": true,
+        "detail": "goal clearance 1.20 m (need >= 0.15)"
+      },
+      {
+        "name": "6.2 goal reachable (voxel search)",
+        "passed": true,
+        "detail": "geodesic start->goal 16.6 m at 0.2 m voxels"
+      },
+      {
+        "name": "6.3 slow/fast path-length ratio",
+        "passed": true,
+        "detail": "slow 30.6 m / fast 18.3 m = 1.67 (need >= 1.3)"
+      },
+      {
+        "name": "6.3 no unintended shortcut",
+        "passed": true,
+        "detail": "geodesic 16.6 m vs fast route 18.3 m (need >= 0.90x)"
+      },
+      {
+        "name": "6.3 speed requires risk",
+        "passed": true,
+        "detail": "shortest path with >= 0.7 m clearance 27.9 m vs slow route 30.6 m (need >= 0.85x)"
+      },
+      {
+        "name": "6.4 fast route passable",
+        "passed": true,
+        "detail": "min clearance 0.38 m at [7.43, 10.35, 1.2] (need >= radius 0.15 + margin 0.05)"
+      },
+      {
+        "name": "6.4 slow route passable",
+        "passed": true,
+        "detail": "min clearance 1.15 m at [3.86, 17.3, 1.2] (need >= radius 0.15 + margin 0.05)"
+      },
+      {
+        "name": "6.4 slow route is safe",
+        "passed": true,
+        "detail": "clearance 1.15 m (>= 0.7), max altitude 1.20 m (<= 2.0)"
+      },
+      {
+        "name": "6.4 fast route is risky",
+        "passed": true,
+        "detail": "features: ['narrow-gap', 'weave(3)']; clearance 0.38 m vs slow 1.15 m"
+      },
+      {
+        "name": "6.4 collider thickness",
+        "passed": true,
+        "detail": "all >= 0.2 m"
+      },
+      {
+        "name": "6.4 primitives inside bounds",
+        "passed": true,
+        "detail": "ok"
+      },
+      {
+        "name": "6.4 fast signature self-check",
+        "passed": true,
+        "detail": "authored fast route classified as 'fast'"
+      },
+      {
+        "name": "6.4 slow signature self-check",
+        "passed": true,
+        "detail": "authored slow route classified as 'slow'"
+      },
+      {
+        "name": "6.5 model flythrough (fast)",
+        "passed": true,
+        "detail": "success in 12.2 s at 1.5 m/s, min clearance 0.31 m, classified 'fast'"
+      },
+      {
+        "name": "6.5 model flythrough (slow)",
+        "passed": true,
+        "detail": "success in 15.6 s at 2.0 m/s, min clearance 0.90 m, classified 'slow'"
+      }
+    ]
+  }
+}

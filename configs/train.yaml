@@ -1,0 +1,175 @@
+# =============================================================================
+# Drone maze speed-navigation -- the ONE training/eval config.
+# =============================================================================
+# Every number the code uses comes from here (or the maze YAML). Override any
+# existing key from the command line without editing this file:
+#   python training/train.py --set reward.collision_penalty=15 --set maze.config=configs/mazes/maze_b_overpass.yaml
+# Unknown keys are rejected (a typo must fail loudly, not silently add a
+# setting nothing reads).
+# =============================================================================
+
+seed: 42
+
+experiment:
+  name: maze_drone
+  run_name: null            # fixed name => `--resume auto` survives walltime kills
+  notes: ""
+  tags: []
+
+maze:
+  config: configs/mazes/maze_a_window.yaml
+
+# ---- simulation ---------------------------------------------------------------
+sim:
+  dt: 0.005                 # 200 Hz physics; the controller runs every physics step
+  decimation: 10            # => policy (and camera) at 20 Hz
+  device: cuda:0
+  use_fabric: true
+  physx:
+    # Only real PhysxCfg fields (validated at startup against the dataclass).
+    gpu_found_lost_pairs_capacity: 4194304      # playbook 5.14: too small => silently dropped contacts
+    gpu_total_aggregate_pairs_capacity: 4194304
+    gpu_max_rigid_contact_count: 1048576
+    gpu_max_rigid_patch_count: 262144
+
+# ---- environment ----------------------------------------------------------------
+env:
+  num_envs: 256             # camera envs: far fewer than state-based (CLAUDE.md s7) -- default, not fallback
+  env_spacing: 24.0         # 20 m maze + perimeter + gap
+  episode_length_s: 40.0    # generous: the slow route at design speed takes ~15-20 s
+  start_noise:
+    pos_m: 0.3              # uniform +-, x/y/z; keeps the policy closed-loop instead of replaying one open-loop sequence
+    yaw_deg: 15.0
+  rerender_on_reset: true   # else the first frame after a reset shows the crash site
+
+# ---- drone ------------------------------------------------------------------------
+drone:
+  usd_path: null            # null => {ISAAC_NUCLEUS_DIR}/Robots/Crazyflie/cf2x.usd (Isaac Lab CRAZYFLIE_CFG)
+  body_name: body
+  collision_radius_m: 0.15  # analytic collision sphere. Crazyflie 2.x motor-to-motor ~0.092 m, props
+                            # reach ~0.065 m from centre: 0.15 is a deliberate safety bubble. The Isaac
+                            # smoke test MEASURES the footprint and fails if it exceeds this (playbook 4).
+  contact_force_threshold_n: 0.05   # PhysX cross-check only (termination is analytic)
+
+controller:                 # drone/controller.py::ControllerGains
+  vel_gain_xy: 3.0
+  vel_gain_z: 4.0
+  max_tilt_deg: 35.0
+  max_acc_z: 6.0
+  att_natural_freq: 25.0
+  att_damping: 0.9
+  yaw_natural_freq: 8.0
+  yaw_damping: 1.0
+  max_yaw_error_rad: 0.6
+  thrust_to_weight: 1.9
+  max_torque_nm: 0.01
+
+# ---- action: [vx, vy, vz, yaw_rate] in the heading frame; policy outputs [-1, 1] ----
+action:
+  vx_range: [-1.0, 4.0]     # m/s (forward-biased: the camera looks forward)
+  vy_range: [-1.5, 1.5]
+  vz_range: [-1.0, 1.0]
+  yaw_rate_range: [-1.5, 1.5]   # rad/s
+
+# ---- observation ---------------------------------------------------------------------
+camera:
+  width: 64
+  height: 64                # smallest that keeps gaps distinguishable -- CONFIRM with validate_sim frames (s6.6)
+  focal_length: 10.5        # with the 20.955 mm aperture => ~90 deg horizontal FOV
+  horizontal_aperture: 20.955
+  clipping_range: [0.05, 40.0]
+  offset_pos: [0.04, 0.0, 0.0]  # body frame, just ahead of the hub (props stay out of view)
+
+observation:
+  camera_enabled: true
+  zero_image: false         # ablation: keep the input shape, feed a blank image ("does vision matter?")
+  goal_vec_scale: 0.05      # body-frame vector to goal * 1/20 m
+  lin_vel_scale: 0.25
+  ang_vel_scale: 0.25
+
+# ---- reward (CLAUDE.md s4). Magnitudes are logged per component; see README. ----
+reward:
+  potential: geodesic       # geodesic | euclidean (ablation)
+  progress_weight: 0.5      # per metre of potential; shaped = w * (gamma_s * Phi(s') - Phi(s)), Phi = -dist
+  shaping_gamma: algo       # "algo" => use algo.ppo.algorithm.gamma (exact Ng et al. invariance); or a float
+  terminal_potential_zero: true   # Phi(terminal) = 0 -- required for invariance in episodic tasks
+  step_penalty: 0.0125      # per policy step => 10.0 over the full 40 s timeout
+  collision_penalty: 10.0
+  goal_bonus: 20.0          # must exceed step_penalty * max_steps (asserted at load)
+  geodesic_grid_res_m: 0.2
+
+# ---- PPO (rsl_rl 2.3.1) --------------------------------------------------------------
+algo:
+  name: ppo
+  library: rsl_rl
+  ppo:
+    num_steps_per_env: 32
+    max_iterations: 2000    # 256 envs x 32 steps = 8192 steps/iter => ~16M env steps
+    save_interval: 50       # the checkpoint-improvement table is built from these
+    empirical_normalization: false   # images are normalised in-network; proprio is pre-scaled
+    policy:
+      class_name: CNNActorCritic
+      init_noise_std: 0.6
+      conv_channels: [32, 64, 64]
+      conv_kernels: [8, 4, 3]
+      conv_strides: [4, 2, 1]
+      feature_dim: 256
+      actor_hidden_dims: [256, 128]
+      critic_hidden_dims: [256, 128]
+      activation: elu
+      shared_encoder: true
+    algorithm:
+      value_loss_coef: 1.0
+      use_clipped_value_loss: true
+      clip_param: 0.2
+      entropy_coef: 0.001   # playbook 8: 0.005 + clipped actions made std GROW; 0.001 converged
+      num_learning_epochs: 4
+      num_mini_batches: 4
+      learning_rate: 3.0e-4
+      schedule: adaptive
+      gamma: 0.997          # 20 Hz: horizon ~330 steps (~17 s) -- episodes are 10-20 s long
+      lam: 0.95
+      desired_kl: 0.01
+      max_grad_norm: 1.0
+
+logging:
+  log_dir: results/runs
+  wandb:
+    enabled: true
+    project: maze-drone
+    entity: null
+    mode: online
+
+# ---- evaluation (eval/evaluate.py) -------------------------------------------------
+eval:
+  num_envs: 64
+  episodes_per_checkpoint: 128
+  deterministic: true       # policy mean; start noise still varies each episode
+  checkpoint_every: 250     # iterations between evaluated checkpoints (must be a multiple of save_interval)
+
+# ---- video (eval/record_video.py) ------------------------------------------------------
+video:
+  resolution: [960, 540]
+  frame_every_n_steps: 1    # 20 fps
+  takes_per_checkpoint: 8   # render all, publish the MEDIAN-representative one (s8: no cherry-picking)
+  overview_eye: [10.0, -9.0, 22.0]    # maze-local: over the south edge, looking down
+  overview_lookat: [10.0, 10.0, 0.0]
+  fpv_inset_scale: 4        # the policy's own camera frame, upscaled into the corner
+  trail_points: 300
+
+# ---- the pre-training checklist (maze/validate.py, eval/validate_sim.py) ----------------
+validation:
+  grid_res_m: 0.2
+  spawn_margin_m: 0.2
+  min_route_ratio: 1.30     # slow route >= 30% longer than fast (CLAUDE.md s5.3)
+  shortcut_tolerance: 0.90  # geodesic shortest path must be >= 0.9 x the fast route
+  safe_path_tolerance: 0.85 # shortest path keeping slow_min_clearance must be >= 0.85 x the slow route
+                            # (authored routes are not corner-cut optimal; the geodesic is)
+  route_clearance_margin_m: 0.05
+  slow_min_clearance_m: 0.70
+  slow_max_altitude_m: 2.0
+  narrow_gap_clearance_m: 0.45
+  vertical_shortcut_dz_m: 1.0
+  weave_obstacle_count: 2
+  weave_distance_m: 1.0
+  min_wall_thickness_m: 0.2

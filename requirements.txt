@@ -1,0 +1,17 @@
+# =============================================================================
+# requirements.txt -- project extras on top of the Isaac stack.
+# =============================================================================
+# NOT here (arc/setup_env.sh installs them, in order, and they must not be
+# upgraded by this file): torch 2.5.1/cu121, isaacsim 4.5.0, Isaac Lab v2.1.0
+# (+ rsl-rl-lib 2.3.1 via `isaaclab.sh --install rsl_rl`).
+#
+# Laptop (pure modules + tests, no Isaac):
+#   pip install "numpy<2" pyyaml torch matplotlib pytest rsl-rl-lib==2.3.1 tensorboard
+# =============================================================================
+numpy>=1.24,<2.0          # Isaac Sim 4.x requires NumPy 1.x
+pyyaml>=6.0
+wandb>=0.16.0
+protobuf>=3.20.2,<5       # Isaac Lab needs <5; unpinned wandb drags it to 7.x (playbook s1)
+imageio[ffmpeg]>=2.31     # flythrough MP4/GIF (eval/record_video.py)
+matplotlib>=3.7.0         # maze plots, curves, frame grids
+pytest>=7.4.0

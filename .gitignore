@@ -1,0 +1,28 @@
+# Results are produced on ARC and copied back; the directory is tracked, contents are not.
+results/*
+!results/.gitkeep
+
+wandb/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+.venv/
+venv/
+
+*.pt
+*.pth
+*.tfevents.*
+
+.vscode/
+.idea/
+.DS_Store
+.claude/settings.local.json
+
+# SLURM logs (directory tracked: sbatch cannot create it)
+logs/slurm/*
+!logs/slurm/.gitkeep
+
+# VT ARC notes from other projects (personal email, account, paths) -- keep out of the public repo
+arc_runbook.md
+arc_quickref.md
